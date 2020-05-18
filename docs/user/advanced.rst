@@ -193,7 +193,7 @@ When you are using the prepared request flow, keep in mind that it does not take
 This can cause problems if you are using environment variables to change the behaviour of requests.
 For example: Self-signed SSL certificates specified in ``REQUESTS_CA_BUNDLE`` will not be taken into account.
 As a result an ``SSL: CERTIFICATE_VERIFY_FAILED`` is thrown.
-You can get around this behaviour by explicity merging the environment settings into your session::
+You can get around this behaviour by explicitly merging the environment settings into your session::
 
     from requests import Request, Session
 
@@ -300,7 +300,7 @@ immediately. You can override this behaviour and defer downloading the response
 body until you access the :attr:`Response.content <requests.Response.content>`
 attribute with the ``stream`` parameter::
 
-    tarball_url = 'https://github.com/requests/requests/tarball/master'
+    tarball_url = 'https://github.com/psf/requests/tarball/master'
     r = requests.get(tarball_url, stream=True)
 
 At this point only the response headers have been downloaded and the connection
@@ -395,8 +395,8 @@ To do that, just set files to a list of tuples of ``(form_field_name, file_info)
 
     >>> url = 'https://httpbin.org/post'
     >>> multiple_files = [
-            ('images', ('foo.png', open('foo.png', 'rb'), 'image/png')),
-            ('images', ('bar.png', open('bar.png', 'rb'), 'image/png'))]
+    ...     ('images', ('foo.png', open('foo.png', 'rb'), 'image/png')),
+    ...     ('images', ('bar.png', open('bar.png', 'rb'), 'image/png'))]
     >>> r = requests.post(url, files=multiple_files)
     >>> r.text
     {
@@ -680,7 +680,7 @@ from GitHub. Suppose we wanted commit ``a050faf`` on Requests. We would get it
 like so::
 
     >>> import requests
-    >>> r = requests.get('https://api.github.com/repos/requests/requests/git/commits/a050faf084662f3a352dd1a941f2c7c9f886d4ad')
+    >>> r = requests.get('https://api.github.com/repos/psf/requests/git/commits/a050faf084662f3a352dd1a941f2c7c9f886d4ad')
 
 We should confirm that GitHub responded correctly. If it has, we want to work
 out what type of content it is. Do this like so::
@@ -698,12 +698,12 @@ So, GitHub returns JSON. That's great, we can use the :meth:`r.json
     >>> commit_data = r.json()
 
     >>> print(commit_data.keys())
-    [u'committer', u'author', u'url', u'tree', u'sha', u'parents', u'message']
+    ['committer', 'author', 'url', 'tree', 'sha', 'parents', 'message']
 
-    >>> print(commit_data[u'committer'])
-    {u'date': u'2012-05-10T11:10:50-07:00', u'email': u'me@kennethreitz.com', u'name': u'Kenneth Reitz'}
+    >>> print(commit_data['committer'])
+    {'date': '2012-05-10T11:10:50-07:00', 'email': 'me@kennethreitz.com', 'name': 'Kenneth Reitz'}
 
-    >>> print(commit_data[u'message'])
+    >>> print(commit_data['message'])
     makin' history
 
 So far, so simple. Well, let's investigate the GitHub API a little bit. Now,
@@ -735,37 +735,37 @@ we should probably avoid making ham-handed POSTS to it. Instead, let's play
 with the Issues feature of GitHub.
 
 This documentation was added in response to
-`Issue #482 <https://github.com/requests/requests/issues/482>`_. Given that
+`Issue #482 <https://github.com/psf/requests/issues/482>`_. Given that
 this issue already exists, we will use it as an example. Let's start by getting it.
 
 ::
 
-    >>> r = requests.get('https://api.github.com/repos/requests/requests/issues/482')
+    >>> r = requests.get('https://api.github.com/repos/psf/requests/issues/482')
     >>> r.status_code
     200
 
     >>> issue = json.loads(r.text)
 
-    >>> print(issue[u'title'])
+    >>> print(issue['title'])
     Feature any http verb in docs
 
-    >>> print(issue[u'comments'])
+    >>> print(issue['comments'])
     3
 
 Cool, we have three comments. Let's take a look at the last of them.
 
 ::
 
-    >>> r = requests.get(r.url + u'/comments')
+    >>> r = requests.get(r.url + '/comments')
     >>> r.status_code
     200
 
     >>> comments = r.json()
 
     >>> print(comments[0].keys())
-    [u'body', u'url', u'created_at', u'updated_at', u'user', u'id']
+    ['body', 'url', 'created_at', 'updated_at', 'user', 'id']
 
-    >>> print(comments[2][u'body'])
+    >>> print(comments[2]['body'])
     Probably in the "advanced" section
 
 Well, that seems like a silly place. Let's post a comment telling the poster
@@ -773,7 +773,7 @@ that he's silly. Who is the poster, anyway?
 
 ::
 
-    >>> print(comments[2][u'user'][u'login'])
+    >>> print(comments[2]['user']['login'])
     kennethreitz
 
 OK, so let's tell this Kenneth guy that we think this example should go in the
@@ -783,7 +783,7 @@ is to POST to the thread. Let's do it.
 ::
 
     >>> body = json.dumps({u"body": u"Sounds great! I'll get right on it!"})
-    >>> url = u"https://api.github.com/repos/requests/requests/issues/482/comments"
+    >>> url = u"https://api.github.com/repos/psf/requests/issues/482/comments"
 
     >>> r = requests.post(url=url, data=body)
     >>> r.status_code
@@ -803,7 +803,7 @@ the very common Basic Auth.
     201
 
     >>> content = r.json()
-    >>> print(content[u'body'])
+    >>> print(content['body'])
     Sounds great! I'll get right on it.
 
 Brilliant. Oh, wait, no! I meant to add that it would take me a while, because
@@ -817,7 +817,7 @@ that.
     5804413
 
     >>> body = json.dumps({u"body": u"Sounds great! I'll get right on it once I feed my cat."})
-    >>> url = u"https://api.github.com/repos/requests/requests/issues/comments/5804413"
+    >>> url = u"https://api.github.com/repos/psf/requests/issues/comments/5804413"
 
     >>> r = requests.patch(url=url, data=body, auth=auth)
     >>> r.status_code
@@ -976,11 +976,12 @@ response at a time. However, these calls will still block.
 
 If you are concerned about the use of blocking IO, there are lots of projects
 out there that combine Requests with one of Python's asynchronicity frameworks.
-Some excellent examples are `requests-threads`_, `grequests`_,  and `requests-futures`_.
+Some excellent examples are `requests-threads`_, `grequests`_, `requests-futures`_, and `requests-async`_.
 
 .. _`requests-threads`: https://github.com/requests/requests-threads
 .. _`grequests`: https://github.com/kennethreitz/grequests
 .. _`requests-futures`: https://github.com/ross/requests-futures
+.. _`requests-async`: https://github.com/encode/requests-async
 
 Header Ordering
 ---------------
